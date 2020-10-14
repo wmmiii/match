@@ -1,7 +1,8 @@
 # Match
 Just a browser implementation of one of those "match 3" games. 
 
-
+## Demo
+https://wmmiii.github.io/match/build/
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 

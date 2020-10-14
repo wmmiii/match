@@ -24,6 +24,7 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "homepage": "https://wmmiii.github.io/match/build",
   "browserslist": {
     "production": [
       ">0.2%",
