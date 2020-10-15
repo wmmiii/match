@@ -1,4 +1,4 @@
-import { forEachCell, getCell, Piece, setCell, State, Grid, swap } from "./state"
+import { forEachCell, getCell, Piece, setCell, State, Grid, swap, ImmutableState } from "./state"
 import { Coordinate } from "./util";
 
 export default class Engine {
@@ -18,7 +18,7 @@ export default class Engine {
     this.matchRules = matchRules.sort((a, b) => b.priority - a.priority);
   }
 
-  get state(): State {
+  get state(): ImmutableState {
     // Never return the actual state, return a copy.
     return JSON.parse(JSON.stringify(this.currentState));
   }
@@ -28,7 +28,9 @@ export default class Engine {
     while (!this.currentState.settled) {
       this.tick();
     }
+    this.currentState.totalScore = 0;
     this.currentState.score = 0;
+    this.currentState.multiplier = 0;
     this.currentState.destroyedThisTick = [];
     console.timeEnd();
   }
@@ -58,7 +60,7 @@ export default class Engine {
     const before = JSON.stringify(previousState);
     let state = this.state;
     let settled = true;
-    state.destroyedLastTick = state.destroyedThisTick;
+    (state as State).destroyedLastTick = state.destroyedThisTick;
     state.destroyedThisTick = [];
 
 
@@ -93,7 +95,15 @@ export default class Engine {
       });
     }
 
-    state.settled = JSON.stringify(state) === before;
+    (state as State).settled = JSON.stringify(state) === before;
+
+    // If the system is settled cash the points
+    if (state.settled) {
+      (state as State).totalScore += state.score * state.multiplier;
+      state.score = 0;
+      state.multiplier = 0;
+    }
+
     this.currentState = state;
     return Object.assign({}, this.currentState);
   }

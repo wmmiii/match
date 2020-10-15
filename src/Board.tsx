@@ -1,7 +1,7 @@
 import React from 'react';
 import { forEachCell, getCell, State, Piece as GamePiece } from './engine/state';
 import pieceTypes from './base/pieceTypes';
-import './Board.css';
+import './Board.scss';
 import { Coordinate } from './engine/util';
 import Piece from './Piece';
 

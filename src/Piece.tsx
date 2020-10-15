@@ -1,5 +1,5 @@
 import React from 'react';
-import './Piece.css';
+import './Piece.scss';
 
 interface PieceProps {
   color: string;

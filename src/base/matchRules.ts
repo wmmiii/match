@@ -22,13 +22,14 @@ function clearGroup(state: State, score: number, ...group: Coordinate[]) {
       setCell(state.destroyedThisTick, x + piece.x, y + piece.y, old);
     }
     state.score += score;
+    state.multiplier += 1;
   });
 
   return state;
 }
 
 const matchRules: MatchRule[] = [
-  { // Match 3 horizontally
+  { // Match 4 horizontally
     priority: 0.1,
     apply: (state) => {
       clearGroup(state,
@@ -40,7 +41,7 @@ const matchRules: MatchRule[] = [
       return state;
     },
   },
-  { // Match 3 Vertically
+  { // Match 4 Vertically
     priority: 0.1,
     apply: (state) => {
       clearGroup(state,

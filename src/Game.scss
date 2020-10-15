@@ -1,0 +1,32 @@
+.Game {
+  align-items: center;
+  background-color: #282c34;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+
+  .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0 auto;
+    min-width: 20em;
+
+    .space {
+      flex-grow: 1;
+    }
+    .spacer {
+      flex-shrink: 0;
+      width: 1em;
+    }
+  }
+
+  .score {
+    font-size: 64px
+  }
+}

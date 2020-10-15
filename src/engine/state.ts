@@ -1,10 +1,18 @@
 export interface State {
   readonly board: Grid<true>;
+  totalScore: number;
+  multiplier: number;
   score: number;
   pieces: Grid<Piece>;
   destroyedThisTick: Grid<Piece>;
   destroyedLastTick: Grid<Piece>;
   settled: boolean;
+}
+
+export interface ImmutableState extends State {
+  readonly totalScore: number;
+  readonly destroyedLastTick: ImmutableGrid<Piece>;
+  readonly settled: boolean;
 }
 
 type PieceType = string;
@@ -54,3 +62,4 @@ export function swap<T>(grid: Grid<T>, x1: number, y1: number, x2: number, y2: n
 }
 
 export type Grid<T> = {[x: number]: {[y: number]: T}};
+export type ImmutableGrid<T> = {readonly [x: number]: {readonly [y: number]: T}};
