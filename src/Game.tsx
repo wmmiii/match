@@ -8,7 +8,7 @@ import moves from './base/moves';
 import matchRules from './base/matchRules';
 import { Coordinate } from './engine/util';
 
-interface GameState  {
+interface GameState {
   engine: Engine;
   gameState: ImmutableState;
   start: Coordinate | undefined;
@@ -17,7 +17,11 @@ interface GameState  {
   multiplier: number;
 }
 
-export default class Game extends React.Component<any, GameState> {
+interface GameProps {
+  audio: boolean;
+}
+
+export default class Game extends React.Component<GameProps, GameState> {
   private lastNumber: Map<keyof GameState, number> = new Map();
   private aBlipRef: React.RefObject<HTMLAudioElement>;
   private amBlipRef: React.RefObject<HTMLAudioElement>;
@@ -119,19 +123,21 @@ export default class Game extends React.Component<any, GameState> {
       this.emBlipRef,
       this.gmBlipRef,
     ];
-    let count = 0;
-    forEachCell(state.destroyedThisTick, () => {
-      count++;
-      window.setTimeout(() => {
-        const index = Math.floor(Math.random() * blips.length);
-        const element = blips[index];
-        if (element != null && element.current != null) {
-          const audio = (element.current.cloneNode(true) as HTMLAudioElement);
-          audio.volume = 1 / count;
-          audio.play();
-        }
-      }, count * 40);
-    });
+    if (this.props.audio) {
+      let count = 0;
+      forEachCell(state.destroyedThisTick, () => {
+        count++;
+        window.setTimeout(() => {
+          const index = Math.floor(Math.random() * blips.length);
+          const element = blips[index];
+          if (element != null && element.current != null) {
+            const audio = (element.current.cloneNode(true) as HTMLAudioElement);
+            audio.volume = 1 / count;
+            audio.play();
+          }
+        }, count * 40);
+      });
+    }
 
     this.setState({
       gameState: state,

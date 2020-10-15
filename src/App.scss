@@ -4,11 +4,17 @@
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   justify-content: center;
   min-height: 100vh;
+  position: relative;
   text-align: center;
+
+  .audio {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
 }
 
 .score {
