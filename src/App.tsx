@@ -71,11 +71,12 @@ export default class App extends React.Component<any, AppState> {
     this.onEnd = this.onEnd.bind(this);
   }
 
-  onStart(s: Coordinate): void {
+  onStart(s: Coordinate): false {
     this.setState({ start: s });
+    return false;
   };
 
-  onEnd(e: Coordinate | undefined): void {
+  onEnd(e: Coordinate | undefined): false {
     const engine = this.state.engine;
     if (e != null && this.state.start != null && engine.state.settled) {
       if (engine.move(this.state.start, e)) {
@@ -91,6 +92,7 @@ export default class App extends React.Component<any, AppState> {
       }
     }
     this.setState({ start: undefined });
+    return false;
   }
 
   render() {
@@ -100,7 +102,7 @@ export default class App extends React.Component<any, AppState> {
         <div className="score">
           {this.state.gameState.score}
         </div>
-        <Board state={this.state.gameState}
+        <Board gameState={this.state.gameState}
             onStart={this.onStart}
             onEnd={this.onEnd}></Board>
       </div>

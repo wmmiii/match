@@ -6,7 +6,8 @@
   transition: all 200ms linear;
 }
 
-.Piece:hover {
+.Piece:hover,
+.Piece.selected {
   background: radial-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
 }
 

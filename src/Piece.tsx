@@ -6,10 +6,12 @@ interface PieceProps {
   icon: string,
   id: string,
   scale: number,
+  selected: boolean;
   x: number,
   y: number,
 
-  actionDown: () => void;
+  actionDown: (event: MouseEvent | TouchEvent) => void;
+  actionMove: (event: MouseEvent | TouchEvent) => void;
   actionUp: () => void;
 };
 
@@ -47,13 +49,18 @@ export default class Piece extends React.Component<PieceProps, PieceState> {
     if (!this.state.visible) {
       className.push('hidden');
     }
+    if (this.props.selected) {
+      className.push('selected');
+    }
 
     return <div
         className={className.join(' ')}
         style={style}
-        onMouseDown={this.props.actionDown}
+        onMouseDown={(event) => this.props.actionDown(event.nativeEvent)}
+        onMouseMove={(event) => this.props.actionMove(event.nativeEvent)}
         onMouseUp={this.props.actionUp}
-        onTouchStart={this.props.actionDown}
+        onTouchStart={(event) => this.props.actionDown(event.nativeEvent)}
+        onTouchMove={(event) => this.props.actionMove(event.nativeEvent)}
         onTouchEnd={this.props.actionUp}>
       <svg width="64" height="64" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
         <use xlinkHref={icon} />

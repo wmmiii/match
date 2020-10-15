@@ -6,58 +6,126 @@ import './Board.css';
 import { Coordinate } from './engine/util';
 
 interface BoardProps {
-  state: State;
-  onStart: (s: Coordinate) => void;
-  onEnd: (e: Coordinate) => void;
+  gameState: State;
+  onStart: (s: Coordinate) => false;
+  onEnd: (e: Coordinate) => false;
 };
+
+interface BoardState {
+  lastCoordinates: Coordinate | undefined;
+}
 
 const scale = 64;
 
-const Board = ({state, onStart, onEnd}: BoardProps) => {
-  let maxX = -Infinity;
-  let minX = Infinity;
-  let maxY = -Infinity;
-  let minY = Infinity;
+export class Board extends React.Component<BoardProps, BoardState> {
+  private boardRef: React.RefObject<HTMLDivElement>;
 
-  const cells: JSX.Element[] = [];
-  forEachCell(state.board, (x, y) => {
-    const style = {
-      left: x * scale + 'px',
-      top: y * scale + 'px',
+  constructor(props: BoardProps) {
+    super(props);
+
+    this.boardRef = React.createRef();
+
+    this.state = {
+      lastCoordinates: undefined,
     };
-    const key = `${x},${y}`
-    cells.push(<div className="Board-cell" style={style} key={key}></div>);
+    this.onStart = this.onStart.bind(this);
+    this.onMove = this.onMove.bind(this);
+    this.onEnd = this.onEnd.bind(this);
+  }
 
-    maxX = Math.max(x, maxX);
-    maxY = Math.max(y, maxY);
-    minX = Math.min(x, minX);
-    minY = Math.min(y, minY);
-  });
+  onStart(event: MouseEvent | TouchEvent) {
+    if (event instanceof MouseEvent) {
+      this.props.onStart(this.toGridSpace(event.clientX, event.clientY));
+    } else {
+      const touch = event.touches[0];
+      this.props.onStart(this.toGridSpace(touch.clientX, touch.clientY));
+    }
+  }
 
-  const pieces: JSX.Element[] = [];
-  forEachCell(state.pieces, (x, y, piece) => {
-    const type = pieceTypes[piece.type];
-    pieces.push(<Piece
-      key={piece.id}
-      color={type.baseColor}
-      icon={type.icon}
-      id={piece.id}
-      scale={scale}
-      actionDown={() => onStart({x, y})}
-      actionUp={() => onEnd({x, y})}
-      x={x}
-      y={y} />);
-  });
+  onMove(event: MouseEvent | TouchEvent) {
+    if (event instanceof MouseEvent) {
+      this.setState({ lastCoordinates: this.toGridSpace(event.clientX, event.clientY) });
+    } else {
+      const touch = event.touches[0];
+      this.setState({ lastCoordinates: this.toGridSpace(touch.clientX, touch.clientY) });
+    }
+  }
 
-  const style = {
-    width: (maxX - minX + 1) * scale + 'px',
-    height: (maxY - minY + 1) * scale + 'px',
-  };
+  onEnd() {
+    if (this.state.lastCoordinates != null) {
+      this.props.onEnd(this.state.lastCoordinates);
+    }
+    this.setState({ lastCoordinates: undefined });
+  }
 
-  return <div className="Board" style={style}>
-    <div className="Board-grid">{cells}</div>
-    <div className="Board-pieces">{pieces}</div>
-  </div>
+  render() {
+    let maxX = -Infinity;
+    let minX = Infinity;
+    let maxY = -Infinity;
+    let minY = Infinity;
+
+    const cells: JSX.Element[] = [];
+    forEachCell(this.props.gameState.board, (x, y) => {
+      const style = {
+        left: x * scale + 'px',
+        top: y * scale + 'px',
+      };
+      const key = `${x},${y}`;
+      cells.push(<div className="Board-cell" style={style} key={key}></div>);
+
+      maxX = Math.max(x, maxX);
+      maxY = Math.max(y, maxY);
+      minX = Math.min(x, minX);
+      minY = Math.min(y, minY);
+    });
+
+    const pieces: JSX.Element[] = [];
+    forEachCell(this.props.gameState.pieces, (x, y, piece) => {
+      const type = pieceTypes[piece.type];
+      const selected = this.state.lastCoordinates != null
+        && this.state.lastCoordinates.x === x
+        && this.state.lastCoordinates.y === y;
+      pieces.push(<Piece
+        color={type.baseColor}
+        icon={type.icon}
+        id={piece.id}
+        key={piece.id}
+        scale={scale}
+        selected={selected}
+        x={x}
+        y={y}
+        
+        actionDown={this.onStart}
+        actionMove={this.onMove}
+        actionUp={this.onEnd} />);
+    });
+
+    const style = {
+      width: (maxX - minX + 1) * scale + 'px',
+      height: (maxY - minY + 1) * scale + 'px',
+    };
+
+    return <div className="Board" ref={this.boardRef} style={style}>
+      <div className="Board-grid">{cells}</div>
+      <div className="Board-pieces">{pieces}</div>
+    </div>
+  }
+
+  private toGridSpace(clientX: number, clientY: number): Coordinate {
+    const rect = this.boardRef.current?.getBoundingClientRect();
+    const left = rect?.left;
+    if (left == null) {
+      throw Error('Could not get left of board ref!');
+    }
+    const top = rect?.top;
+    if (top == null) {
+      throw Error('Could not get top of board ref!');
+    }
+    return {
+      x: Math.floor((clientX - left) / scale),
+      y: Math.floor((clientY - top) / scale),
+    };
+  }
 }
 
 export default Board;
