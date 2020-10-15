@@ -1,9 +1,9 @@
 import React from 'react';
-import { forEachCell, getCell, State } from './engine/state';
-import Piece from './Piece';
+import { forEachCell, getCell, State, Piece as GamePiece } from './engine/state';
 import pieceTypes from './base/pieceTypes';
 import './Board.css';
 import { Coordinate } from './engine/util';
+import Piece from './Piece';
 
 interface BoardProps {
   gameState: State;
@@ -84,7 +84,7 @@ export class Board extends React.Component<BoardProps, BoardState> {
     });
 
     const pieces: JSX.Element[] = [];
-    forEachCell(this.props.gameState.destroyedPieces, (x, y, piece) => {
+    const destroyed = (x: number, y: number, piece: GamePiece) => {
       const type = pieceTypes[piece.type];
       pieces.push(<Piece
         color={type.baseColor}
@@ -100,7 +100,9 @@ export class Board extends React.Component<BoardProps, BoardState> {
         actionDown={() => {}}
         actionMove={() => {}}
         actionUp={() => {}} />);
-    });
+    };
+    forEachCell(this.props.gameState.destroyedThisTick, destroyed);
+    forEachCell(this.props.gameState.destroyedLastTick, destroyed);
     forEachCell(this.props.gameState.pieces, (x, y, piece) => {
       const type = pieceTypes[piece.type];
       const selected = this.state.lastCoordinates != null

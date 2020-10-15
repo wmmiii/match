@@ -5,7 +5,7 @@
   opacity: 1;
   position: absolute;
   transform: translateY(0);
-  transition: all 200ms linear;
+  transition: all 150ms linear;
 }
 
 .Piece:hover,
@@ -15,16 +15,17 @@
 
 .Piece.hidden {
   opacity: 0;
-  transform: translateY(-64px);
+  transform: translateY(-32px);
 }
 
 .Piece.destroyed {
   color: #fff !important;
-  filter: blur(2px);
+  filter: blur(3px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease-out,
-      blur 200ms ease-out,
-      color 100ms ease-out;
+  transition: opacity 150ms ease-out,
+      blur 150ms ease-out,
+      color 50ms ease-out;
   z-index: 1;
+  transform: scale(1.2);
 }

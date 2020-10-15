@@ -29,7 +29,7 @@ export default class Engine {
       this.tick();
     }
     this.currentState.score = 0;
-    this.currentState.destroyedPieces = [];
+    this.currentState.destroyedThisTick = [];
     console.timeEnd();
   }
 
@@ -58,7 +58,9 @@ export default class Engine {
     const before = JSON.stringify(previousState);
     let state = this.state;
     let settled = true;
-    state.destroyedPieces = [];
+    state.destroyedLastTick = state.destroyedThisTick;
+    state.destroyedThisTick = [];
+
 
     // Make list of falling cells.
     const falling: Grid<true> = {};

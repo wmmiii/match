@@ -58,7 +58,8 @@ export default class App extends React.Component<any, AppState> {
       },
       score: 0,
       pieces: [],
-      destroyedPieces: [],
+      destroyedThisTick: [],
+      destroyedLastTick: [],
       settled: false,
     };
 
@@ -84,9 +85,8 @@ export default class App extends React.Component<any, AppState> {
     const engine = this.state.engine;
     if (e != null && this.state.start != null && engine.state.settled) {
       if (engine.move(this.state.start, e)) {
-        this.setState({ gameState: engine.state });
+        this.setState({ gameState: engine.tick() });
         this.targetScore(engine.state.score);
-        this.forceUpdate();
         let interval = window.setInterval(() => {;
           this.setState({ gameState: engine.tick() });
           this.targetScore(engine.state.score);
@@ -94,7 +94,7 @@ export default class App extends React.Component<any, AppState> {
           if (this.state.gameState.settled) {
             window.clearInterval(interval);
           }
-        }, 200);
+        }, 150);
       }
     }
     this.setState({ start: undefined });

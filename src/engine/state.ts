@@ -2,7 +2,8 @@ export interface State {
   readonly board: Grid<true>;
   score: number;
   pieces: Grid<Piece>;
-  destroyedPieces: Grid<Piece>;
+  destroyedThisTick: Grid<Piece>;
+  destroyedLastTick: Grid<Piece>;
   settled: boolean;
 }
 
