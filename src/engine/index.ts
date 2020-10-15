@@ -1,4 +1,4 @@
-import { forEachCell, getCell, Piece, setCell, State, Grid } from "./state"
+import { forEachCell, getCell, Piece, setCell, State, Grid, swap } from "./state"
 import { Coordinate } from "./util";
 
 export default class Engine {
@@ -6,16 +6,16 @@ export default class Engine {
   private generator: Generator;
 
   private allowedMoves: Move[];
-  private rules: Rule[];
+  private matchRules: MatchRule[];
 
   constructor(initialState: State,
       generator: Generator,
       allowedMoves: Move[],
-      rules: Rule[]) {
+      matchRules: MatchRule[]) {
     this.currentState = initialState;
     this.generator = generator;
     this.allowedMoves = allowedMoves;
-    this.rules = rules.sort((a, b) => a.priority - b.priority);
+    this.matchRules = matchRules.sort((a, b) => b.priority - a.priority);
   }
 
   get state(): State {
@@ -40,9 +40,7 @@ export default class Engine {
     if (this.currentState.settled === true
         && this.allowedMoves.some((f) => f(start, end, this.currentState))) {
       // If the move is legal swap the pieces.
-      const temp = this.currentState.pieces[start.x][start.y];
-      this.currentState.pieces[start.x][start.y] = this.currentState.pieces[end.x][end.y];
-      this.currentState.pieces[start.x][start.y] = temp;
+      swap(this.currentState.pieces, start.x, start.y, end.x, end.y);
       this.currentState.settled = false;
       return true;
     } else {
@@ -81,9 +79,9 @@ export default class Engine {
       settled = false;
     });
 
-    // Apply rules.
+    // Apply match rules.
     if (settled) {
-      this.rules.forEach((rule) => {
+      this.matchRules.forEach((rule) => {
         const before = JSON.stringify(state);
         state = rule.apply(state);
         if (before !== JSON.stringify(state)) {
@@ -99,7 +97,7 @@ export default class Engine {
 
 export type Move = (start: Coordinate, end: Coordinate, state: State) => boolean;
 
-export interface Rule {
+export interface MatchRule {
   priority: number,
   apply: (start: State) => State,
 };

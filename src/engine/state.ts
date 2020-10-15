@@ -43,4 +43,10 @@ export function forEachCell<T>(grid: Grid<T>, action: (x: number, y: number, obj
   }
 }
 
+export function swap<T>(grid: Grid<T>, x1: number, y1: number, x2: number, y2: number): void {
+  const temp = getCell(grid, x1, y1);
+  setCell(grid, x1, y1, getCell(grid, x2, y2));
+  setCell(grid, x2, y2, temp);
+}
+
 export type Grid<T> = {[x: number]: {[y: number]: T}};

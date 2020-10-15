@@ -6,57 +6,104 @@ import { State } from './engine/state';
 import Engine from './engine';
 import generator from './base/generator';
 import moves from './base/moves';
-import rules from './base/rules';
+import matchRules from './base/matches';
+import { Coordinate } from './engine/util';
 
-function App() {
-  const state: State = {
-    board: {
-      0: {
-        1: true,
-        2: true,
-        3: true,
-      },
-      1: {
-        0: true,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-      },
-      2: {
-        0: true,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-      },
-      3: {
-        0: true,
-        1: true,
-        2: true,
-        3: true,
-        4: true,
-      },
-      4: {
-        1: true,
-        2: true,
-        3: true,
-      },
-    },
-    score: 0,
-    pieces: [],
-    settled: false,
-  };
-
-  const engine = new Engine(state, generator, moves, rules);
-  engine.initialize();
-
-  return (
-    <div className="App">
-      <BasePieces />
-      <Board state={engine.state}></Board>
-    </div>
-  );
+interface AppState  {
+  engine: Engine;
+  gameState: State;
+  start: Coordinate | undefined;
 }
 
-export default App;
+export default class App extends React.Component<any, AppState> {
+
+  constructor(props: any) {
+    super(props);
+
+    const gameState: State = {
+      board: {
+        0: {
+          1: true,
+          2: true,
+          3: true,
+        },
+        1: {
+          0: true,
+          1: true,
+          2: true,
+          3: true,
+          4: true,
+        },
+        2: {
+          0: true,
+          1: true,
+          2: true,
+          3: true,
+          4: true,
+        },
+        3: {
+          0: true,
+          1: true,
+          2: true,
+          3: true,
+          4: true,
+        },
+        4: {
+          1: true,
+          2: true,
+          3: true,
+        },
+      },
+      score: 0,
+      pieces: [],
+      settled: false,
+    };
+
+    const engine = new Engine(gameState, generator, moves, matchRules);
+    engine.initialize();
+
+    this.state = {
+      engine: engine,
+      gameState: engine.state,
+      start: undefined,
+    };
+    this.onStart = this.onStart.bind(this);
+    this.onEnd = this.onEnd.bind(this);
+  }
+
+  onStart(s: Coordinate): void {
+    this.setState({ start: s });
+  };
+
+  onEnd(e: Coordinate | undefined): void {
+    const engine = this.state.engine;
+    if (e != null && this.state.start != null && engine.state.settled) {
+      if (engine.move(this.state.start, e)) {
+        this.setState({ gameState: engine.state });
+        this.forceUpdate();
+        let interval = window.setInterval(() => {;
+          this.setState({ gameState: engine.tick() });
+          this.forceUpdate();
+          if (this.state.gameState.settled) {
+            window.clearInterval(interval);
+          }
+        }, 200);
+      }
+    }
+    this.setState({ start: undefined });
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <BasePieces />
+        <div className="score">
+          {this.state.gameState.score}
+        </div>
+        <Board state={this.state.gameState}
+            onStart={this.onStart}
+            onEnd={this.onEnd}></Board>
+      </div>
+      );
+  }
+}

@@ -10,3 +10,7 @@
   min-height: 100vh;
   text-align: center;
 }
+
+.score {
+  font-size: 64px
+}
