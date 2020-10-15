@@ -13,9 +13,11 @@ interface AppState  {
   engine: Engine;
   gameState: State;
   start: Coordinate | undefined;
+  score: number;
 }
 
 export default class App extends React.Component<any, AppState> {
+  private interval: number = 0;
 
   constructor(props: any) {
     super(props);
@@ -66,6 +68,7 @@ export default class App extends React.Component<any, AppState> {
       engine: engine,
       gameState: engine.state,
       start: undefined,
+      score: engine.state.score,
     };
     this.onStart = this.onStart.bind(this);
     this.onEnd = this.onEnd.bind(this);
@@ -81,9 +84,11 @@ export default class App extends React.Component<any, AppState> {
     if (e != null && this.state.start != null && engine.state.settled) {
       if (engine.move(this.state.start, e)) {
         this.setState({ gameState: engine.state });
+        this.targetScore(engine.state.score);
         this.forceUpdate();
         let interval = window.setInterval(() => {;
           this.setState({ gameState: engine.tick() });
+          this.targetScore(engine.state.score);
           this.forceUpdate();
           if (this.state.gameState.settled) {
             window.clearInterval(interval);
@@ -95,12 +100,32 @@ export default class App extends React.Component<any, AppState> {
     return false;
   }
 
+  targetScore(score: number): void {
+    window.clearInterval(this.interval);
+    const startTime = new Date().getTime();
+    const startScore = this.state.score;
+
+    const interval = window.setInterval(() => {
+      let t = (new Date().getTime() - startTime) / 1000;
+      if (t > 1) {
+        this.setState({ score: score });
+        window.clearInterval(interval);
+        return;
+      }
+      this.setState({
+        score: Math.floor(this.easeOutCirc(t, startScore, score - startScore)),
+      });
+    }, 10);
+
+    this.interval = interval;
+  }
+
   render() {
     return (
       <div className="App">
         <BasePieces />
         <div className="score">
-          {this.state.gameState.score}
+          {this.state.score}
         </div>
         <Board gameState={this.state.gameState}
             onStart={this.onStart}
@@ -108,4 +133,9 @@ export default class App extends React.Component<any, AppState> {
       </div>
       );
   }
+
+  private easeOutCirc(t: number, start: number, delta: number) {
+    t--;
+    return delta * Math.sqrt(1 - t*t) + start;
+  };
 }
