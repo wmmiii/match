@@ -23,6 +23,15 @@ export default class Engine {
     return JSON.parse(JSON.stringify(this.currentState));
   }
 
+  initialize(): void {
+    console.time();
+    while (!this.currentState.settled) {
+      this.tick();
+    }
+    this.currentState.score = 0;
+    console.timeEnd();
+  }
+
   /**
    * Performs a move and sets the board into a new state does not perform
    * scoring yet. Returns a boolean indicating if the rule is legal.
@@ -47,6 +56,7 @@ export default class Engine {
    */
   tick(): State {
     const previousState = this.state;
+    const before = JSON.stringify(previousState);
     let state = this.state;
     let settled = true;
 
@@ -77,12 +87,11 @@ export default class Engine {
         const before = JSON.stringify(state);
         state = rule.apply(state);
         if (before !== JSON.stringify(state)) {
-          settled = false;
         }
       });
     }
 
-    state.settled = settled;
+    state.settled = JSON.stringify(state) === before;
     this.currentState = state;
     return Object.assign({}, this.currentState);
   }
