@@ -1,7 +1,7 @@
 import React from 'react';
 import './Game.scss';
 import Board from './Board';
-import { ImmutableState, State } from './engine/state';
+import { forEachCell, ImmutableState, State } from './engine/state';
 import Engine from './engine';
 import generator from './base/generator';
 import moves from './base/moves';
@@ -18,8 +18,11 @@ interface GameState  {
 }
 
 export default class Game extends React.Component<any, GameState> {
-  private interval: Map<keyof GameState, number> = new Map();
   private lastNumber: Map<keyof GameState, number> = new Map();
+  private aBlipRef: React.RefObject<HTMLAudioElement>;
+  private amBlipRef: React.RefObject<HTMLAudioElement>;
+  private emBlipRef: React.RefObject<HTMLAudioElement>;
+  private gmBlipRef: React.RefObject<HTMLAudioElement>;
 
   constructor(props: any) {
     super(props);
@@ -70,6 +73,11 @@ export default class Game extends React.Component<any, GameState> {
     const engine = new Engine(gameState, generator, moves, matchRules);
     engine.initialize();
 
+    this.aBlipRef = React.createRef();
+    this.amBlipRef = React.createRef();
+    this.emBlipRef = React.createRef();
+    this.gmBlipRef = React.createRef();
+
     this.state = {
       engine: engine,
       gameState: engine.state,
@@ -105,6 +113,26 @@ export default class Game extends React.Component<any, GameState> {
   }
 
   update(state: ImmutableState) {
+    const blips = [
+      this.aBlipRef,
+      this.amBlipRef,
+      this.emBlipRef,
+      this.gmBlipRef,
+    ];
+    let count = 0;
+    forEachCell(state.destroyedThisTick, () => {
+      count++;
+      window.setTimeout(() => {
+        const index = Math.floor(Math.random() * blips.length);
+        const element = blips[index];
+        if (element != null && element.current != null) {
+          const audio = (element.current.cloneNode(true) as HTMLAudioElement);
+          audio.volume = 1 / count;
+          audio.play();
+        }
+      }, count * 40);
+    });
+
     this.setState({
       gameState: state,
       multiplier: state.multiplier,
@@ -114,7 +142,6 @@ export default class Game extends React.Component<any, GameState> {
       this.targetNumber('score', state.score, 200); 
     } else {
       this.setState({ score: 0 });
-      window.clearInterval(this.interval.get('score'));
       this.lastNumber.set('score', 0);
     }
   }
@@ -127,24 +154,25 @@ export default class Game extends React.Component<any, GameState> {
     const startTime = new Date().getTime();
     const startValue = this.state[property] as number;
 
-    console.log(`reset ${property} target`);
-    window.clearInterval(this.interval.get(property));
-    const interval = window.setInterval(() => {
+    const onFrame = () => {
+      if (this.lastNumber.get(property) !== value) {
+        return;
+      }
+
       let t = (new Date().getTime() - startTime) / speed;
       if (t > 1) {
         const state: any = {};
         state[property] = value;
         this.setState(state);
-        console.log(`${property} complete`);
-        window.clearInterval(interval);
         return;
       }
       const state: any = {};
       state[property] = Math.floor(this.easeOutCirc(t, startValue, value - startValue));
       this.setState(state);
-    }, 10);
+      window.requestAnimationFrame(onFrame);
+    };
+    window.requestAnimationFrame(onFrame);
 
-    this.interval.set(property, interval);
     this.lastNumber.set(property, value);
   }
 
@@ -167,6 +195,10 @@ export default class Game extends React.Component<any, GameState> {
         <Board gameState={this.state.gameState}
             onStart={this.onStart}
             onEnd={this.onEnd}></Board>
+        <audio ref={this.aBlipRef} src="aBlip.wav" />
+        <audio ref={this.amBlipRef} src="amBlip.wav" />
+        <audio ref={this.emBlipRef} src="emBlip.wav" />
+        <audio ref={this.gmBlipRef} src="gmBlip.wav" />
       </div>
       );
   }
