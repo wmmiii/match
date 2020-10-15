@@ -1,5 +1,5 @@
 import React from 'react';
-import { forEachCell, State } from './engine/state';
+import { forEachCell, getCell, State } from './engine/state';
 import Piece from './Piece';
 import pieceTypes from './base/pieceTypes';
 import './Board.css';
@@ -71,7 +71,11 @@ export class Board extends React.Component<BoardProps, BoardState> {
         top: y * scale + 'px',
       };
       const key = `${x},${y}`;
-      cells.push(<div className="Board-cell" style={style} key={key}></div>);
+      const className = ['Board-cell']
+      if (getCell(this.props.gameState.board, x, y - 1) == null) {
+        className.push('Board-entry');
+      }
+      cells.push(<div className={className.join(' ')} style={style} key={key}></div>);
 
       maxX = Math.max(x, maxX);
       maxY = Math.max(y, maxY);
@@ -80,6 +84,23 @@ export class Board extends React.Component<BoardProps, BoardState> {
     });
 
     const pieces: JSX.Element[] = [];
+    forEachCell(this.props.gameState.destroyedPieces, (x, y, piece) => {
+      const type = pieceTypes[piece.type];
+      pieces.push(<Piece
+        color={type.baseColor}
+        destroyed={true}
+        icon={type.icon}
+        id={piece.id}
+        key={piece.id}
+        scale={scale}
+        selected={false}
+        x={x}
+        y={y}
+
+        actionDown={() => {}}
+        actionMove={() => {}}
+        actionUp={() => {}} />);
+    });
     forEachCell(this.props.gameState.pieces, (x, y, piece) => {
       const type = pieceTypes[piece.type];
       const selected = this.state.lastCoordinates != null
@@ -87,6 +108,7 @@ export class Board extends React.Component<BoardProps, BoardState> {
         && this.state.lastCoordinates.y === y;
       pieces.push(<Piece
         color={type.baseColor}
+        destroyed={false}
         icon={type.icon}
         id={piece.id}
         key={piece.id}

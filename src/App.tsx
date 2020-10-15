@@ -58,6 +58,7 @@ export default class App extends React.Component<any, AppState> {
       },
       score: 0,
       pieces: [],
+      destroyedPieces: [],
       settled: false,
     };
 

@@ -2,6 +2,7 @@ export interface State {
   readonly board: Grid<true>;
   score: number;
   pieces: Grid<Piece>;
+  destroyedPieces: Grid<Piece>;
   settled: boolean;
 }
 
@@ -21,14 +22,16 @@ export function getCell<T>(grid: Grid<T>, x: number, y: number): T | undefined {
   }
 }
 
-export function setCell<T>(grid: Grid<T>, x: number, y: number, object: T): void {
+export function setCell<T>(grid: Grid<T>, x: number, y: number, object: T): T | undefined {
   let column = grid[x];
   if (column == null) {
     grid[x] = {};
     column = grid[x];
   }
 
+  const old = column[y];
   column[y] = object;
+  return old;
 }
 
 export function forEachCell<T>(grid: Grid<T>, action: (x: number, y: number, object: T) => void) {

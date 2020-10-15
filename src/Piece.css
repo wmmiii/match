@@ -1,5 +1,7 @@
 .Piece {
+  background: none;
   cursor: pointer;
+  filter: blur(0);
   opacity: 1;
   position: absolute;
   transform: translateY(0);
@@ -14,4 +16,15 @@
 .Piece.hidden {
   opacity: 0;
   transform: translateY(-64px);
+}
+
+.Piece.destroyed {
+  color: #fff !important;
+  filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out,
+      blur 200ms ease-out,
+      color 100ms ease-out;
+  z-index: 1;
 }

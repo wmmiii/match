@@ -23,3 +23,12 @@
   position: absolute;
   width: 64px;
 }
+
+.Board-entry::before {
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(255, 255, 255, 0.4);
+  content: '';
+  height: 0;
+  width: 0;
+}

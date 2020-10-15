@@ -4,7 +4,7 @@ const pieceTypes: {[key: string]: PieceType} = {
   'alpha': {
     type: 'alpha',
     icon: 'alpha',
-    baseColor: '#0066FF',
+    baseColor: '#4791ff',
   },
   'beta': {
     type: 'beta',

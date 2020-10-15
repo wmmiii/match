@@ -18,7 +18,8 @@ function clearGroup(state: State, score: number, ...group: Coordinate[]) {
     }
 
     for (let piece of group) {
-      setCell(state.pieces, x + piece.x, y + piece.y, undefined);
+      const old = setCell(state.pieces, x + piece.x, y + piece.y, undefined);
+      setCell(state.destroyedPieces, x + piece.x, y + piece.y, old);
     }
     state.score += score;
   });

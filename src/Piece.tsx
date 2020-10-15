@@ -2,13 +2,14 @@ import React from 'react';
 import './Piece.css';
 
 interface PieceProps {
-  color: string,
-  icon: string,
-  id: string,
-  scale: number,
+  color: string;
+  icon: string;
+  destroyed: boolean;
+  id: string;
+  scale: number;
   selected: boolean;
-  x: number,
-  y: number,
+  x: number;
+  y: number;
 
   actionDown: (event: MouseEvent | TouchEvent) => void;
   actionMove: (event: MouseEvent | TouchEvent) => void;
@@ -51,6 +52,9 @@ export default class Piece extends React.Component<PieceProps, PieceState> {
     }
     if (this.props.selected) {
       className.push('selected');
+    }
+    if (this.props.destroyed) {
+      className.push('destroyed');
     }
 
     return <div
