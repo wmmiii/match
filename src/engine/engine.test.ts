@@ -4,7 +4,11 @@ import { getCell, setCell } from './state';
 test('pieces fall', () => {
   let pieceCount = 2;
   const engine = new Engine({
+    totalScore: 0,
+    multiplier: 0,
     score: 0,
+    destroyedLastTick: [],
+    destroyedThisTick: [],
     board: {
       0: {
         0: true,
@@ -61,7 +65,11 @@ test('pieces fall', () => {
 test('rules are applied only once pieces are settled', () => {
   let pieceCount = 3;
   const engine = new Engine({
+    totalScore: 0,
+    multiplier: 0,
     score: 0,
+    destroyedLastTick: [],
+    destroyedThisTick: [],
     board: {
       0: {
         0: true,
@@ -105,6 +113,7 @@ test('rules are applied only once pieces are settled', () => {
       const bottom = getCell(state.pieces, 0, 3);
       if (bottom == null || bottom.type !== 'bar') {
         state.score++;
+        state.multiplier = 1;
         setCell(state.pieces, 0, 0, undefined);
         setCell(state.pieces, 0, 1, undefined);
         setCell(state.pieces, 0, 2, undefined);
@@ -118,5 +127,7 @@ test('rules are applied only once pieces are settled', () => {
     engine.tick();
   }
 
-  expect(engine.state.score).toBe(1);
+  expect(engine.state.totalScore).toBe(1);
+  expect(engine.state.score).toBe(0);
+  expect(engine.state.multiplier).toBe(0);
 });

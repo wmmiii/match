@@ -1,15 +1,11 @@
 import React from 'react';
 import './Game.scss';
 import Board from './Board';
-import { forEachCell, ImmutableState, State } from './engine/state';
+import { forEachCell, ImmutableState } from './engine/state';
 import Engine from './engine';
-import generator from './base/generator';
-import moves from './base/moves';
-import matchRules from './base/matchRules';
 import { Coordinate } from './engine/util';
 
 interface GameState {
-  engine: Engine;
   gameState: ImmutableState;
   start: Coordinate | undefined;
   totalScore: number;
@@ -19,6 +15,7 @@ interface GameState {
 
 interface GameProps {
   audio: boolean;
+  engine: Engine;
 }
 
 export default class Game extends React.Component<GameProps, GameState> {
@@ -28,67 +25,22 @@ export default class Game extends React.Component<GameProps, GameState> {
   private emBlipRef: React.RefObject<HTMLAudioElement>;
   private gmBlipRef: React.RefObject<HTMLAudioElement>;
 
-  constructor(props: any) {
+  constructor(props: GameProps) {
     super(props);
-
-    const gameState: State = {
-      board: {
-        0: {
-          1: true,
-          2: true,
-          3: true,
-        },
-        1: {
-          0: true,
-          1: true,
-          2: true,
-          3: true,
-          4: true,
-        },
-        2: {
-          0: true,
-          1: true,
-          2: true,
-          3: true,
-          4: true,
-        },
-        3: {
-          0: true,
-          1: true,
-          2: true,
-          3: true,
-          4: true,
-        },
-        4: {
-          1: true,
-          2: true,
-          3: true,
-        },
-      },
-      totalScore: 0,
-      score: 0,
-      multiplier: 0,
-      pieces: [],
-      destroyedThisTick: [],
-      destroyedLastTick: [],
-      settled: false,
-    };
-
-    const engine = new Engine(gameState, generator, moves, matchRules);
-    engine.initialize();
 
     this.aBlipRef = React.createRef();
     this.amBlipRef = React.createRef();
     this.emBlipRef = React.createRef();
     this.gmBlipRef = React.createRef();
 
+    props.engine.initialize();
+
     this.state = {
-      engine: engine,
-      gameState: engine.state,
+      gameState: props.engine.state,
       start: undefined,
-      totalScore: engine.state.totalScore,
-      score: engine.state.score,
-      multiplier: engine.state.multiplier,
+      totalScore: props.engine.state.totalScore,
+      score: props.engine.state.score,
+      multiplier: props.engine.state.multiplier,
     };
     this.onStart = this.onStart.bind(this);
     this.onEnd = this.onEnd.bind(this);
@@ -100,7 +52,7 @@ export default class Game extends React.Component<GameProps, GameState> {
   };
 
   onEnd(e: Coordinate | undefined): false {
-    const engine = this.state.engine;
+    const engine = this.props.engine;
     if (e != null && this.state.start != null && engine.state.settled) {
       if (engine.move(this.state.start, e)) {
         this.update(engine.tick());

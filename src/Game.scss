@@ -4,10 +4,9 @@
   color: white;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   justify-content: center;
-  min-height: 100vh;
+  overflow: hidden;
   text-align: center;
 
   .header {
@@ -15,15 +14,22 @@
     flex-direction: row;
     justify-content: space-between;
     margin: 0 auto;
-    min-width: 20em;
+    width: 20em;
+    flex-shrink: 0;
 
     .space {
       flex-grow: 1;
     }
+
     .spacer {
       flex-shrink: 0;
       width: 1em;
     }
+  }
+
+  .Board {
+    flex: 1;
+    align-self: stretch;
   }
 
   .score {

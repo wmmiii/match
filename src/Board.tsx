@@ -13,24 +13,58 @@ interface BoardProps {
 
 interface BoardState {
   lastCoordinates: Coordinate | undefined;
+  scale: number;
+  translateX: number;
+  translateY: number;
+  gridWidth: number;
+  gridHeight: number;
 }
 
 const scale = 64;
 
 export class Board extends React.Component<BoardProps, BoardState> {
   private boardRef: React.RefObject<HTMLDivElement>;
+  private gridRef: React.RefObject<HTMLDivElement>;
 
   constructor(props: BoardProps) {
     super(props);
 
     this.boardRef = React.createRef();
+    this.gridRef = React.createRef();
+
+    let maxX = -Infinity;
+    let minX = Infinity;
+    let maxY = -Infinity;
+    let minY = Infinity;
+
+    forEachCell(this.props.gameState.board, (x, y) => {
+      maxX = Math.max(x, maxX);
+      maxY = Math.max(y, maxY);
+      minX = Math.min(x, minX);
+      minY = Math.min(y, minY);
+    });
 
     this.state = {
       lastCoordinates: undefined,
+      scale: scale,
+      translateX: 0,
+      translateY: 0,
+      gridWidth: (maxX - minX + 1),
+      gridHeight: (maxY - minY + 1),
     };
     this.onStart = this.onStart.bind(this);
     this.onMove = this.onMove.bind(this);
     this.onEnd = this.onEnd.bind(this);
+    this.onResize = this.onResize.bind(this);
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.onResize);
+    this.onResize();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
   }
 
   onStart(event: MouseEvent | TouchEvent) {
@@ -58,12 +92,30 @@ export class Board extends React.Component<BoardProps, BoardState> {
     this.setState({ lastCoordinates: undefined });
   }
 
-  render() {
-    let maxX = -Infinity;
-    let minX = Infinity;
-    let maxY = -Infinity;
-    let minY = Infinity;
+  onResize() {
+    const rect = this.boardRef.current?.getBoundingClientRect();
+    if (rect == null) {
+      return;
+    }
 
+    const currentWidth = this.state.gridWidth * scale;
+    const currentHeight = this.state.gridHeight * scale;
+
+    const targetWidth = rect.width - 32;
+    const targetHeight = rect.height - 32;
+
+    let scaleFactor: number;
+    if (targetWidth / targetHeight > currentWidth / currentHeight) {
+      // Calculate in terms of height
+      scaleFactor = targetHeight / currentHeight;
+    } else {
+      scaleFactor = targetWidth / currentWidth;
+    }
+
+    this.setState({ scale: scaleFactor });
+  }
+
+  render() {
     const cells: JSX.Element[] = [];
     forEachCell(this.props.gameState.board, (x, y) => {
       const style = {
@@ -76,11 +128,6 @@ export class Board extends React.Component<BoardProps, BoardState> {
         className.push('Board-entry');
       }
       cells.push(<div className={className.join(' ')} style={style} key={key}></div>);
-
-      maxX = Math.max(x, maxX);
-      maxY = Math.max(y, maxY);
-      minX = Math.min(x, minX);
-      minY = Math.min(y, minY);
     });
 
     const pieces: JSX.Element[] = [];
@@ -124,19 +171,25 @@ export class Board extends React.Component<BoardProps, BoardState> {
         actionUp={this.onEnd} />);
     });
 
-    const style = {
-      width: (maxX - minX + 1) * scale + 'px',
-      height: (maxY - minY + 1) * scale + 'px',
+    const innerStyle = {
+      width: this.state.gridWidth * scale,
+      height: this.state.gridHeight * scale,
     };
 
-    return <div className="Board" ref={this.boardRef} style={style}>
-      <div className="Board-grid">{cells}</div>
-      <div className="Board-pieces">{pieces}</div>
+    const transform = `scale(${this.state.scale})`;
+
+    const contextStyle = { transform: transform };
+
+    return <div className="Board" ref={this.boardRef}>
+      <div className="context" style={contextStyle}>
+        <div className="Board-grid" ref={this.gridRef} style={innerStyle}>{cells}</div>
+        <div className="Board-pieces" style={innerStyle}>{pieces}</div>
+      </div>
     </div>
   }
 
   private toGridSpace(clientX: number, clientY: number): Coordinate {
-    const rect = this.boardRef.current?.getBoundingClientRect();
+    const rect = this.gridRef.current?.getBoundingClientRect();
     const left = rect?.left;
     if (left == null) {
       throw Error('Could not get left of board ref!');
@@ -146,8 +199,8 @@ export class Board extends React.Component<BoardProps, BoardState> {
       throw Error('Could not get top of board ref!');
     }
     return {
-      x: Math.floor((clientX - left) / scale),
-      y: Math.floor((clientY - top) / scale),
+      x: Math.floor((clientX - left) / scale / this.state.scale),
+      y: Math.floor((clientY - top) / scale / this.state.scale),
     };
   }
 }
