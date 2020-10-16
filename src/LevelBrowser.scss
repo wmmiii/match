@@ -11,6 +11,7 @@
   .pack {
     margin: auto;
     max-width: 30em;
+    padding: 1em;
 
     ol {
       list-style: none;
@@ -20,20 +21,20 @@
     li {
       @include selectable();
 
+      background: none;
       border-top: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
-      padding: 1em;
-      padding-left: 2em;
-      background: none;
+      display: flex;
+      flex-direction: row;
+      padding: 1em 1em 1em 2em;
 
       h3 {
-        display: inline;
         margin: 0;
+        flex-shrink: 0;
       }
 
       p {
-        display: inline;
-        margin-left: 1em;
+        margin: 0 0 0 1em;
         font-size: 0.8em;
         color: rgba(255, 255, 255, 0.7);
       }
