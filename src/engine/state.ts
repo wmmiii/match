@@ -1,18 +1,36 @@
 export interface State {
-  readonly board: Grid<true>;
-  totalScore: number;
-  multiplier: number;
-  score: number;
-  pieces: Grid<Piece>;
-  destroyedThisTick: Grid<Piece>;
   destroyedLastTick: Grid<Piece>;
+  destroyedThisTick: Grid<Piece>;
+  moveCount: number;
+  multiplier: number;
+  pieces: Grid<Piece>;
+  readonly board: Grid<true>;
+  readonly gameStart: Date;
+  readonly totalMoves: number;
+  score: number;
   settled: boolean;
+  totalScore: number;
+  status: GameStatus;
 }
 
 export interface ImmutableState extends State {
-  readonly totalScore: number;
   readonly destroyedLastTick: ImmutableGrid<Piece>;
+  readonly moveCount: number;
   readonly settled: boolean;
+  readonly totalScore: number;
+  readonly status: GameStatus;
+}
+
+export interface GameDescription {
+  readonly board: Grid<true>;
+  readonly totalMoves: number;
+  readonly pieces: Grid<Piece>;
+}
+
+export enum GameStatus {
+  IN_PROGRESS,
+  SUCCEEDED,
+  FAILED,
 }
 
 type PieceType = string;

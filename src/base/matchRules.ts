@@ -2,105 +2,66 @@ import { MatchRule } from '../engine';
 import { forEachCell, getCell, setCell, State } from '../engine/state';
 import { Coordinate } from '../engine/util';
 
-function clearGroup(state: State, score: number, ...group: Coordinate[]) {
+function clearLines(state: State): State {
   const pieces = state.pieces;
-  forEachCell(state.board, (x, y) => {
-    const first = getCell(pieces, x, y);
-    if (first == null) {
+  const removal: Coordinate[] = [];
+  forEachCell(pieces, (x, y, piece) => {
+    if (getCell(pieces, x, y) == null
+        || removal.some(c => c.x === x && c.y === y)) {
       return;
     }
-    const type = first.type;
-    for (let piece of group) {
-      const nth = getCell(pieces, x + piece.x, y + piece.y);
-      if (nth == null || nth.type !== type) {
-        return;
+
+    const curr: Coordinate = { x: x, y: y };
+    const horizontal: Coordinate[] = [{ x: x, y: y }];
+    while (true) {
+      curr.x += 1;
+      const currPiece = getCell(pieces, curr.x, curr.y);
+      if (currPiece != null && currPiece.type === piece.type) {
+        horizontal.push({x: curr.x, y: curr.y});
+      } else {
+        break;
       }
     }
 
-    for (let piece of group) {
-      const old = setCell(state.pieces, x + piece.x, y + piece.y, undefined);
-      setCell(state.destroyedThisTick, x + piece.x, y + piece.y, old);
+    if (horizontal.length > 2) {
+      state.score += (horizontal.length - 2) * 100;
+      state.multiplier += 1;
+      removal.push(...horizontal);
     }
-    state.score += score;
-    state.multiplier += 1;
+
+    curr.x = x;
+    curr.y = y;
+    const vertical: Coordinate[] = [{ x: x, y: y }];
+    while (true) {
+      curr.y += 1;
+      const currPiece = getCell(pieces, curr.x, curr.y);
+      if (currPiece != null && currPiece.type === piece.type) {
+        vertical.push({x: curr.x, y: curr.y});
+      } else {
+        break;
+      }
+    }
+
+    if (vertical.length > 2) {
+      state.score += (vertical.length - 2) * 100;
+      state.multiplier += 1;
+      removal.push(...vertical);
+    }
   });
+
+  for (const coord of removal) {
+    const old = setCell(state.pieces, coord.x, coord.y, undefined);
+    setCell(state.destroyedThisTick, coord.x, coord.y, old);
+  }
 
   return state;
 }
 
 const matchRules: MatchRule[] = [
-  { // Match 5 horizontally
-    priority: 0.2,
-    apply: (state) => {
-      clearGroup(state,
-        500,
-        { x: -4, y: 0 },
-        { x: -3, y: 0 },
-        { x: -2, y: 0 },
-        { x: -1, y: 0 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
-  { // Match 5 Vertically
-    priority: 0.2,
-    apply: (state) => {
-      clearGroup(state,
-        500,
-        { x: 0, y: -4 },
-        { x: 0, y: -3 },
-        { x: 0, y: -2 },
-        { x: 0, y: -1 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
-  { // Match 4 horizontally
-    priority: 0.1,
-    apply: (state) => {
-      clearGroup(state,
-        300,
-        { x: -3, y: 0 },
-        { x: -2, y: 0 },
-        { x: -1, y: 0 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
-  { // Match 4 Vertically
-    priority: 0.1,
-    apply: (state) => {
-      clearGroup(state,
-        300,
-        { x: 0, y: -3 },
-        { x: 0, y: -2 },
-        { x: 0, y: -1 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
-  { // Match 3 horizontally
+  {
     priority: 0,
-    apply: (state) => {
-      clearGroup(state,
-        100,
-        { x: -2, y: 0 },
-        { x: -1, y: 0 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
-  { // Match 3 Vertically
-    priority: 0,
-    apply: (state) => {
-      clearGroup(state,
-        100,
-        { x: 0, y: -2 },
-        { x: 0, y: -1 },
-        { x: 0, y: 0 });
-      return state;
-    },
-  },
+    apply: clearLines,
+  }
 ];
 
 export default matchRules;

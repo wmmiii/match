@@ -1,5 +1,5 @@
 import React from 'react';
-import { forEachCell, getCell, State, Piece as GamePiece } from './engine/state';
+import { forEachCell, getCell, State, Piece as GamePiece, GameStatus } from './engine/state';
 import pieceTypes from './base/pieceTypes';
 import './Board.scss';
 import { Coordinate } from './engine/util';
@@ -154,7 +154,8 @@ export class Board extends React.Component<BoardProps, BoardState> {
       const type = pieceTypes[piece.type];
       const selected = this.state.lastCoordinates != null
         && this.state.lastCoordinates.x === x
-        && this.state.lastCoordinates.y === y;
+        && this.state.lastCoordinates.y === y
+        && this.props.gameState.status === GameStatus.IN_PROGRESS;
       pieces.push(<Piece
         color={type.baseColor}
         destroyed={false}

@@ -1,5 +1,11 @@
-import { forEachCell, getCell, Piece, setCell, State, Grid, swap, ImmutableState } from "./state"
+import { forEachCell, getCell, Piece, setCell, State, Grid, swap, ImmutableState, GameStatus, GameDescription } from "./state"
 import { Coordinate } from "./util";
+
+export enum ObjectiveStatus {
+  PENDING,
+  SUCCEEDED,
+  FAILED,
+}
 
 export default class Engine {
   private currentState: State;
@@ -7,20 +13,45 @@ export default class Engine {
 
   private allowedMoves: Move[];
   private matchRules: MatchRule[];
+  private gameObjectives: Objective[];
 
-  constructor(initialState: State,
+  constructor(description: GameDescription,
       generator: Generator,
       allowedMoves: Move[],
-      matchRules: MatchRule[]) {
-    this.currentState = initialState;
+      matchRules: MatchRule[],
+      objectives: Objective[]) {
+    this.currentState = {
+      destroyedLastTick: [],
+      destroyedThisTick: [],
+      moveCount: 0,
+      multiplier: 0,
+      pieces: description.pieces,
+      board: description.board,
+      gameStart: new Date(),
+      totalMoves: description.totalMoves,
+      score: 0,
+      settled: false,
+      totalScore: 0,
+      status: GameStatus.IN_PROGRESS,
+    };
     this.generator = generator;
     this.allowedMoves = allowedMoves;
     this.matchRules = matchRules.sort((a, b) => b.priority - a.priority);
+    this.gameObjectives = objectives;
   }
 
   get state(): ImmutableState {
     // Never return the actual state, return a copy.
     return JSON.parse(JSON.stringify(this.currentState));
+  }
+
+  get objectives(): ObjectiveDescription[] {
+    return this.gameObjectives.map(o => {
+      return {
+        description: o.description,
+        status: o.status(this.state),
+      };
+    })
   }
 
   initialize(): void {
@@ -40,11 +71,16 @@ export default class Engine {
    * scoring yet. Returns a boolean indicating if the rule is legal.
    */
   move(start: Coordinate, end: Coordinate): boolean {
+    if (this.currentState.status !== GameStatus.IN_PROGRESS) {
+      return false;
+    }
+
     if (this.currentState.settled === true
         && this.allowedMoves.some((f) => f(start, end, this.currentState))) {
       // If the move is legal swap the pieces.
       swap(this.currentState.pieces, start.x, start.y, end.x, end.y);
       this.currentState.settled = false;
+      this.currentState.moveCount++;
       return true;
     } else {
       return false;
@@ -88,20 +124,31 @@ export default class Engine {
     // Apply match rules.
     if (settled) {
       this.matchRules.forEach((rule) => {
-        const before = JSON.stringify(state);
         state = rule.apply(state);
-        if (before !== JSON.stringify(state)) {
-        }
       });
     }
 
     (state as State).settled = JSON.stringify(state) === before;
 
-    // If the system is settled cash the points
+    // Check objectives.
+    if (this.gameObjectives.some(o => o.status(state) === ObjectiveStatus.FAILED)) {
+      (state as State).status = GameStatus.FAILED;
+    }
+
     if (state.settled) {
+      // If the system is settled cash the points.
       (state as State).totalScore += state.score * state.multiplier;
       state.score = 0;
       state.multiplier = 0;
+
+      // Check to see if we're out of moves.
+      if (state.moveCount === state.totalMoves) {
+        if (this.gameObjectives.some(o => o.status(state) !== ObjectiveStatus.SUCCEEDED)) {
+          (state as State).status = GameStatus.FAILED;
+        } else {
+          (state as State).status = GameStatus.SUCCEEDED;
+        }
+      }
     }
 
     this.currentState = state;
@@ -117,3 +164,13 @@ export interface MatchRule {
 };
 
 export type Generator = (coord: Coordinate) => Piece;
+
+export interface Objective {
+  description: string;
+  status: (state: State) => ObjectiveStatus;
+}
+
+export interface ObjectiveDescription {
+  readonly description: string;
+  readonly status: ObjectiveStatus;
+}
