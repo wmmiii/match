@@ -21,18 +21,21 @@ interface GameProps {
 
 export default class Game extends React.Component<GameProps, GameState> {
   private lastNumber: Map<keyof GameState, number> = new Map();
-  private aBlipRef: React.RefObject<HTMLAudioElement>;
-  private amBlipRef: React.RefObject<HTMLAudioElement>;
-  private emBlipRef: React.RefObject<HTMLAudioElement>;
-  private gmBlipRef: React.RefObject<HTMLAudioElement>;
+  private e3BlipRef: React.RefObject<HTMLAudioElement>;
+  private b3BlipRef: React.RefObject<HTMLAudioElement>;
+  private e4BlipRef: React.RefObject<HTMLAudioElement>;
+  private g4BlipRef: React.RefObject<HTMLAudioElement>;
+  private b4BlipRef: React.RefObject<HTMLAudioElement>;
+  private e5BlipRef: React.RefObject<HTMLAudioElement>;
 
   constructor(props: GameProps) {
     super(props);
-
-    this.aBlipRef = React.createRef();
-    this.amBlipRef = React.createRef();
-    this.emBlipRef = React.createRef();
-    this.gmBlipRef = React.createRef();
+    this.e3BlipRef = React.createRef();
+    this.b3BlipRef = React.createRef();
+    this.e4BlipRef = React.createRef();
+    this.g4BlipRef = React.createRef();
+    this.b4BlipRef = React.createRef();
+    this.e5BlipRef = React.createRef();
 
     props.engine.initialize();
 
@@ -71,10 +74,12 @@ export default class Game extends React.Component<GameProps, GameState> {
 
   update(state: ImmutableState) {
     const blips = [
-      this.aBlipRef,
-      this.amBlipRef,
-      this.emBlipRef,
-      this.gmBlipRef,
+      this.e3BlipRef,
+      this.b3BlipRef,
+      this.e4BlipRef,
+      this.g4BlipRef,
+      this.b4BlipRef,
+      this.e5BlipRef,
     ];
     if (this.props.audio) {
       let count = 0;
@@ -188,10 +193,12 @@ export default class Game extends React.Component<GameProps, GameState> {
               onEnd={this.onEnd}></Board>
           {moveCounter}
         </div>
-        <audio ref={this.aBlipRef} src="aBlip.wav" />
-        <audio ref={this.amBlipRef} src="amBlip.wav" />
-        <audio ref={this.emBlipRef} src="emBlip.wav" />
-        <audio ref={this.gmBlipRef} src="gmBlip.wav" />
+        <audio ref={this.e3BlipRef} src="e3blip.wav" />
+        <audio ref={this.b3BlipRef} src="b3blip.wav" />
+        <audio ref={this.e4BlipRef} src="e4blip.wav" />
+        <audio ref={this.g4BlipRef} src="g4blip.wav" />
+        <audio ref={this.b4BlipRef} src="b4blip.wav" />
+        <audio ref={this.e5BlipRef} src="e5blip.wav" />
         <svg width="64" height="64" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <path id="pending" d="M48 16h2a2 2 0 00-2-2v2zm-32 0v-2a2 2 0 00-2 2h2zm0 32h-2c0 1.1.9 2 2 2v-2zm32 0v2a2 2 0 002-2h-2zm0-34H16v4h32v-4zm-34 2v32h4V16h-4zm2 34h32v-4H16v4zm34-2V16h-4v32h4z" fill="#A3A3A3"/>

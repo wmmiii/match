@@ -7,7 +7,7 @@ function clearLines(state: State): State {
   const removal: Coordinate[] = [];
   forEachCell(pieces, (x, y, piece) => {
     if (getCell(pieces, x, y) == null
-        || removal.some(c => c.x === x && c.y === y)) {
+      || removal.some(c => c.x === x && c.y === y)) {
       return;
     }
 
@@ -17,7 +17,7 @@ function clearLines(state: State): State {
       curr.x += 1;
       const currPiece = getCell(pieces, curr.x, curr.y);
       if (currPiece != null && currPiece.type === piece.type) {
-        horizontal.push({x: curr.x, y: curr.y});
+        horizontal.push({ x: curr.x, y: curr.y });
       } else {
         break;
       }
@@ -36,7 +36,7 @@ function clearLines(state: State): State {
       curr.y += 1;
       const currPiece = getCell(pieces, curr.x, curr.y);
       if (currPiece != null && currPiece.type === piece.type) {
-        vertical.push({x: curr.x, y: curr.y});
+        vertical.push({ x: curr.x, y: curr.y });
       } else {
         break;
       }
