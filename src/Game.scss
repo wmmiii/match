@@ -6,7 +6,6 @@
   font-size: calc(10px + 2vmin);
   justify-content: center;
   overflow: hidden;
-  text-align: center;
 
   .header {
     display: flex;
@@ -32,11 +31,21 @@
     flex-direction: row;
     flex: 1;
 
+    @media (max-aspect-ratio: 1/1) {
+      & {
+        flex-direction: column;
+      }
+    }
+
     .objectives {
       flex-shrink: 0;
-      max-width: 10em;
       text-align: left;
       padding: 1em;
+      align-self: stretch;
+
+      h3 {
+        margin: 0 0 1em 0;
+      }
 
       ol {
         list-style: none;
@@ -47,6 +56,13 @@
       .objective {
         display: flex;
         flex-direction: row;
+        max-width: 10em;
+
+        @media (max-aspect-ratio: 1/1) {
+          & {
+            display: inline-flex;
+          }
+        }
 
         svg {
           flex-shrink: 0;
@@ -71,9 +87,10 @@
       bottom: 0;
       display: flex;
       flex-direction: column;
-      align-self: stretch;
+      position: absolute;
+      right: 0;
+      top: 0;
       width: 0.4em;
-      position: relative;
   
       .moves-remaining {
         background-color: rgba(255, 255, 255, 0.4);
