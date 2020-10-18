@@ -4,11 +4,6 @@ import { getCell, setCell } from './state';
 test('pieces fall', () => {
   let pieceCount = 2;
   const engine = new Engine({
-    totalScore: 0,
-    multiplier: 0,
-    score: 0,
-    destroyedLastTick: [],
-    destroyedThisTick: [],
     board: {
       0: {
         0: true,
@@ -29,7 +24,7 @@ test('pieces fall', () => {
         }
       },
     },
-    settled: false,
+    totalMoves: Infinity,
   },
   () => {
     return {
@@ -37,6 +32,7 @@ test('pieces fall', () => {
       type: 'foo',
     }
   },
+  [],
   [],
   []);
 
@@ -65,11 +61,6 @@ test('pieces fall', () => {
 test('rules are applied only once pieces are settled', () => {
   let pieceCount = 3;
   const engine = new Engine({
-    totalScore: 0,
-    multiplier: 0,
-    score: 0,
-    destroyedLastTick: [],
-    destroyedThisTick: [],
     board: {
       0: {
         0: true,
@@ -98,7 +89,7 @@ test('rules are applied only once pieces are settled', () => {
         }
       },
     },
-    settled: false,
+    totalMoves: Infinity,
   },
   () => {
     return {
@@ -121,7 +112,8 @@ test('rules are applied only once pieces are settled', () => {
       }
       return state;
     },
-  }]);
+  }],
+  []);
 
   while (!engine.state.settled) {
     engine.tick();
